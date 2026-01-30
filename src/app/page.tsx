@@ -12,18 +12,41 @@ export type StickerConfig = {
   id: string;
   src: string;
   rotate?: number;
+  width?: number;
 };
 
 export const STICKERS: StickerConfig[] = [
-  { id: "calcifer", src: "/calcifer_sticker.png", rotate: -15 },
-  { id: "goose", src: "/goose.png", rotate: 10 },
-  { id: "mlh", src: "/mlh_sticker.png", rotate: -8 },
+  { id: "calcifer", src: "/stickers/calcifer_sticker.png", rotate: -15 },
+  { id: "goose", src: "/stickers/goose.png", rotate: 10 },
+  { id: "mlh", src: "/stickers/mlh_sticker.png", rotate: -8 },
+  { id: "loveworm", src: "/stickers/loveworm.png", rotate: 5 },
+  { id: "apple", src: "/stickers/apple.png", rotate: 8 },
+  { id: "git", src: "/stickers/git.png", rotate: -5 },
+  { id: "babymilo", src: "/stickers/babymilo.png", rotate: -12 },
+  { id: "aws", src: "/stickers/aws.png", rotate: 5, width: 150 },
+  { id: "linux", src: "/stickers/linux.png", rotate: -8, width: 150 },
+  { id: "node", src: "/stickers/node.png", rotate: 10, width: 150 },
+  { id: "ny", src: "/stickers/ny.png", rotate: -5, width: 150 },
+  { id: "python", src: "/stickers/pythonsticker.png", rotate: 8, width: 150 },
+  { id: "react", src: "/stickers/react.png", rotate: -12, width: 150 },
+  { id: "ruby", src: "/stickers/ruby.png", rotate: 6, width: 150 },
 ];
 
 const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
+  apple: { x: 1242, y: 345 },
+  aws: { x: 293, y: 522 },
+  babymilo: { x: 1044, y: 248 },
   calcifer: { x: 1258, y: 0 },
+  git: { x: 1257, y: 570 },
   goose: { x: 1088, y: 1 },
+  linux: { x: 321, y: 658 },
+  loveworm: { x: 1074, y: 449 },
   mlh: { x: 1248, y: 233 },
+  node: { x: 1088, y: 654 },
+  ny: { x: 779, y: 3 },
+  python: { x: 236, y: 26 },
+  react: { x: 961, y: 18 },
+  ruby: { x: 294, y: 406 },
 };
 
 export default function Home() {
@@ -69,15 +92,22 @@ export default function Home() {
   useEffect(() => {
     if (showContent && typeof window !== "undefined") {
       const width = window.innerWidth;
+      const height = window.innerHeight;
       const rightX = width - STICKER_SIZE - 40;
       const gap = 20;
+      const centerX = width / 2 - STICKER_SIZE / 2;
+      const centerY = height / 2 - STICKER_SIZE / 2;
+      let centerOffset = 0;
       setStickerPositions(
-        STICKERS.map((sticker, i) =>
-          INITIAL_STICKER_POSITIONS[sticker.id] ?? {
-            x: rightX,
-            y: 20 + i * (STICKER_SIZE + gap),
-          }
-        ),
+        STICKERS.map((sticker, i) => {
+          const existing = INITIAL_STICKER_POSITIONS[sticker.id];
+          if (existing) return existing;
+          const offset = centerOffset++;
+          return {
+            x: centerX + (offset % 3) * 100 - 100,
+            y: centerY + Math.floor(offset / 3) * 100 - 100,
+          };
+        }),
       );
     }
   }, [showContent]);
@@ -204,7 +234,7 @@ export default function Home() {
                       <StickerPeel
                         imageSrc={sticker.src}
                         rotate={sticker.rotate}
-                        width={STICKER_SIZE}
+                        width={sticker.width ?? STICKER_SIZE}
                         initialPosition={pos as any}
                         peelDirection={0}
                         clampOnResize={false}
