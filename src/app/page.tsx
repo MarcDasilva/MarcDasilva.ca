@@ -6,7 +6,9 @@ import DotBackground from "@/components/DotBackground";
 import Image from "next/image";
 import StickerPeel from "@/components/StickerPeel";
 
-const STICKER_SIZE = 210;
+const STICKER_SIZE = 240;
+const DESIGN_WIDTH = 1920;
+const DESIGN_HEIGHT = 1080;
 
 export type StickerConfig = {
   id: string;
@@ -23,13 +25,13 @@ export const STICKERS: StickerConfig[] = [
   { id: "apple", src: "/stickers/apple.png", rotate: 8 },
   { id: "git", src: "/stickers/git.png", rotate: -5 },
   { id: "babymilo", src: "/stickers/babymilo.png", rotate: -12 },
-  { id: "aws", src: "/stickers/aws.png", rotate: 5, width: 150 },
-  { id: "linux", src: "/stickers/linux.png", rotate: -8, width: 150 },
-  { id: "node", src: "/stickers/node.png", rotate: 10, width: 150 },
-  { id: "ny", src: "/stickers/ny.png", rotate: -5, width: 150 },
-  { id: "python", src: "/stickers/pythonsticker.png", rotate: 8, width: 150 },
-  { id: "react", src: "/stickers/react.png", rotate: -12, width: 150 },
-  { id: "ruby", src: "/stickers/ruby.png", rotate: 6, width: 150 },
+  { id: "aws", src: "/stickers/aws.png", rotate: 5, width: 170 },
+  { id: "linux", src: "/stickers/linux.png", rotate: -8, width: 170 },
+  { id: "node", src: "/stickers/node.png", rotate: 10, width: 170 },
+  { id: "ny", src: "/stickers/ny.png", rotate: -5, width: 170 },
+  { id: "python", src: "/stickers/pythonsticker.png", rotate: 8, width: 170 },
+  { id: "react", src: "/stickers/react.png", rotate: -12, width: 170 },
+  { id: "ruby", src: "/stickers/ruby.png", rotate: 6, width: 170 },
 ];
 
 const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
@@ -61,7 +63,16 @@ export default function Home() {
   // Stickers currently playing the fall animation (so we don't block new holds)
   const [animatingOffIndices, setAnimatingOffIndices] = useState<number[]>([]);
   const [resetInstant, setResetInstant] = useState(false);
+  const [viewportSize, setViewportSize] = useState({ w: DESIGN_WIDTH, h: DESIGN_HEIGHT });
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const updateSize = () =>
+      setViewportSize({ w: window.innerWidth, h: window.innerHeight });
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -91,15 +102,11 @@ export default function Home() {
 
   useEffect(() => {
     if (showContent && typeof window !== "undefined") {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const rightX = width - STICKER_SIZE - 40;
-      const gap = 20;
-      const centerX = width / 2 - STICKER_SIZE / 2;
-      const centerY = height / 2 - STICKER_SIZE / 2;
+      const centerX = DESIGN_WIDTH / 2 - STICKER_SIZE / 2;
+      const centerY = DESIGN_HEIGHT / 2 - STICKER_SIZE / 2;
       let centerOffset = 0;
       setStickerPositions(
-        STICKERS.map((sticker, i) => {
+        STICKERS.map((sticker) => {
           const existing = INITIAL_STICKER_POSITIONS[sticker.id];
           if (existing) return existing;
           const offset = centerOffset++;
@@ -144,27 +151,47 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const scale = Math.max(
+    viewportSize.w / DESIGN_WIDTH,
+    viewportSize.h / DESIGN_HEIGHT
+  );
+
   return (
     <div className="fixed inset-0 overflow-hidden bg-black">
-      <div className="relative w-full h-full flex items-center justify-center">
-        <video
-          ref={videoRef}
-          src="/landinglatest.mp4"
-          autoPlay
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        />
+      <div
+        className="absolute left-1/2 top-1/2 origin-center"
+        style={{
+          width: DESIGN_WIDTH,
+          height: DESIGN_HEIGHT,
+          transform: `translate(-50%, -50%) scale(${scale})`,
+          transformOrigin: "center center",
+        }}
+      >
+        <div className="relative w-full h-full flex items-center justify-center">
+          <video
+            ref={videoRef}
+            src="/landinglatest.mp4"
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            style={{ width: DESIGN_WIDTH, height: DESIGN_HEIGHT }}
+          />
 
-        {showContent && (
-          <>
-            <DotBackground className="fade-in" />
-            {/* Stickers above marc dasilva text */}
-            {stickerPositions.length > 0 && (
-              <div
-                className="absolute top-0 left-0 w-full h-full fade-in"
-                style={{ zIndex: 10, pointerEvents: "none" }}
-              >
+          {showContent && (
+            <>
+              <DotBackground className="fade-in" />
+              {/* Stickers above marc dasilva text */}
+              {stickerPositions.length > 0 && (
+                <div
+                  className="absolute top-0 left-0 fade-in"
+                  style={{
+                    width: DESIGN_WIDTH,
+                    height: DESIGN_HEIGHT,
+                    zIndex: 10,
+                    pointerEvents: "none",
+                  }}
+                >
                 {STICKERS.map((sticker: StickerConfig, i: number) => {
                   if (fallenStickerIndices.includes(i)) return null;
                   const pos = stickerPositions[i];
@@ -268,10 +295,10 @@ export default function Home() {
               <div
                 className="text-black fade-in relative pointer-events-auto"
                 style={{
-                  width: "clamp(280px, 85vw, 600px)",
-                  maxHeight: "clamp(400px, 85vh, 800px)",
-                  padding: "clamp(12px, 3vw, 24px) clamp(16px, 4vw, 32px)",
-                  fontSize: "clamp(11px, 1.8vw, 14px)",
+                  width: "clamp(320px, 90vw, 680px)",
+                  maxHeight: "clamp(440px, 88vh, 880px)",
+                  padding: "clamp(14px, 3.2vw, 28px) clamp(18px, 4.5vw, 36px)",
+                  fontSize: "clamp(12px, 2vw, 16px)",
                   overflow: "auto",
                 }}
               >
@@ -284,7 +311,7 @@ export default function Home() {
                     <div
                       className="font-normal"
                       style={{
-                        fontSize: "3em",
+                        fontSize: "3.5em",
                         fontFamily: "var(--font-script)",
                         marginTop: "2em",
                       }}
@@ -621,6 +648,7 @@ export default function Home() {
             </div>
           </>
         )}
+        </div>
       </div>
     </div>
   );
