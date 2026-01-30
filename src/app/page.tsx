@@ -6,12 +6,19 @@ import DotBackground from "@/components/DotBackground";
 import Image from "next/image";
 import StickerPeel from "@/components/StickerPeel";
 
-const STICKER_SIZE = 180;
-const STICKERS = [
-  { src: "/calcifer_sticker.png", rotate: -15 },
-  { src: "/goose.png", rotate: 10 },
-  { src: "/mlh_sticker.png", rotate: -8 },
-] as const;
+const STICKER_SIZE = 210;
+
+export type StickerConfig = {
+  id: string;
+  src: string;
+  rotate?: number;
+};
+
+export const STICKERS: StickerConfig[] = [
+  { id: "calcifer", src: "/calcifer_sticker.png", rotate: -15 },
+  { id: "goose", src: "/goose.png", rotate: 10 },
+  { id: "mlh", src: "/mlh_sticker.png", rotate: -8 },
+];
 
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -54,16 +61,14 @@ export default function Home() {
   useEffect(() => {
     if (showContent && typeof window !== "undefined") {
       const width = window.innerWidth;
-      const height = window.innerHeight;
-      // Position stickers above the "marc dasilva" text, centered horizontally
-      // The text is roughly centered, so we position stickers above center
-      const centerX = width / 2;
-      const topY = height / 2 - 200; // Above the centered content
-      setStickerPositions([
-        { x: centerX - 250, y: topY },
-        { x: centerX - 80, y: topY - 20 },
-        { x: centerX + 90, y: topY }, // MLH sticker back in same row
-      ]);
+      const rightX = width - STICKER_SIZE - 40;
+      const gap = 20;
+      setStickerPositions(
+        STICKERS.map((_, i) => ({
+          x: rightX,
+          y: 20 + i * (STICKER_SIZE + gap),
+        }))
+      );
     }
   }, [showContent]);
 
@@ -120,21 +125,21 @@ export default function Home() {
                 className="absolute top-0 left-0 w-full h-full fade-in"
                 style={{ zIndex: 10, pointerEvents: "none" }}
               >
-                {STICKERS.map((sticker, i) => {
+                {STICKERS.map((sticker: StickerConfig, i: number) => {
                   if (fallenStickerIndices.includes(i)) return null;
                   const pos = stickerPositions[i];
                   if (!pos) return null;
                   const isFalling = animatingOffIndices.includes(i);
                   return (
                     <motion.div
-                      key={i}
+                      key={sticker.id}
                       className="absolute cursor-pointer"
                       style={{
-                        left: pos.x,
-                        top: pos.y,
-                        width: STICKER_SIZE,
-                        height: STICKER_SIZE,
-                        pointerEvents: "auto",
+                        left: 0,
+                        top: 0,
+                        width: "100%",
+                        height: "100%",
+                        pointerEvents: "none",
                       }}
                       initial={{ y: 0, rotate: 0, opacity: 1 }}
                       animate={
@@ -150,7 +155,8 @@ export default function Home() {
                         duration: resetInstant ? 0 : 2,
                         ease: [0.25, 0.46, 0.45, 0.94],
                       }}
-                      onPointerDownCapture={() => {
+                      onPointerDownCapture={(e) => {
+                        if (e.shiftKey) return;
                         holdTimeoutRef.current = setTimeout(() => {
                           setAnimatingOffIndices((prev) => [...prev, i]);
                           holdTimeoutRef.current = null;
@@ -188,8 +194,26 @@ export default function Home() {
                         imageSrc={sticker.src}
                         rotate={sticker.rotate}
                         width={STICKER_SIZE}
-                        initialPosition={{ x: 0, y: 0 } as any}
+                        initialPosition={pos as any}
                         peelDirection={0}
+                        onDragEnd={(x: number, y: number) => {
+                          const rounded = { x: Math.round(x), y: Math.round(y) };
+                          setStickerPositions((prev) => {
+                            const next = [...prev];
+                            if (next[i] !== undefined) next[i] = rounded;
+                            const byId = STICKERS.reduce<Record<string, { x: number; y: number }>>(
+                              (acc, s, idx) => {
+                                const p = next[idx];
+                                if (p != null) acc[s.id] = p;
+                                return acc;
+                              },
+                              {}
+                            );
+                            console.log(`Sticker "${sticker.id}" →`, rounded);
+                            console.log("All sticker positions:", byId);
+                            return next;
+                          });
+                        }}
                       />
                     </motion.div>
                   );

@@ -17,7 +17,8 @@ const StickerPeel = ({
   lightingIntensity = 0.1,
   initialPosition = 'center',
   peelDirection = 0,
-  className = ''
+  className = '',
+  onDragEnd: onDragEndCallback
 }) => {
   const containerRef = useRef(null);
   const dragTargetRef = useRef(null);
@@ -62,6 +63,11 @@ const StickerPeel = ({
         const rotationEase = 'power2.out';
         const duration = 0.8;
         gsap.to(target, { rotation: 0, duration, ease: rotationEase });
+        if (typeof onDragEndCallback === 'function') {
+          const x = gsap.getProperty(target, 'x');
+          const y = gsap.getProperty(target, 'y');
+          onDragEndCallback(Number(x), Number(y));
+        }
       }
     })[0];
 

@@ -120,6 +120,7 @@
 .draggable {
   position: absolute;
   cursor: grab;
+  pointer-events: auto;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
 }
