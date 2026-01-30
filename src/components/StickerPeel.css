@@ -41,7 +41,8 @@
 }
 
 .sticker-lighting {
-  filter: url(#pointLight);
+  /* Lighting filter disabled to avoid tint on load */
+  filter: none;
 }
 
 .sticker-container:hover .sticker-main,
@@ -109,7 +110,8 @@
 }
 
 .flap-lighting {
-  filter: url(#pointLightFlipped);
+  /* Lighting filter disabled to avoid tint */
+  filter: none;
 }
 
 .flap-image {

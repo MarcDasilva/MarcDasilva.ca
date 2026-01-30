@@ -32,9 +32,9 @@ export const STICKERS: StickerConfig[] = [
   { id: "python", src: "/stickers/pythonsticker.png", rotate: 8, width: 170 },
   { id: "react", src: "/stickers/react.png", rotate: -12, width: 170 },
   { id: "ruby", src: "/stickers/ruby.png", rotate: 6, width: 170 },
-  { id: "bee", src: "/stickers/bee.png", rotate: -6 },
-  { id: "hackpton", src: "/stickers/hackpton.png", rotate: 7 },
-  { id: "spotify", src: "/stickers/spotify.png", rotate: -10 },
+  { id: "bee", src: "/stickers/bee.png", rotate: -6, width: 170 },
+  { id: "hackpton", src: "/stickers/hackpton.png", rotate: 7, width: 170 },
+  { id: "spotify", src: "/stickers/spotify.png", rotate: -10, width: 170 },
 ];
 
 const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
