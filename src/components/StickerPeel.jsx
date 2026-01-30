@@ -18,7 +18,8 @@ const StickerPeel = ({
   initialPosition = 'center',
   peelDirection = 0,
   className = '',
-  onDragEnd: onDragEndCallback
+  onDragEnd: onDragEndCallback,
+  clampOnResize = true
 }) => {
   const containerRef = useRef(null);
   const dragTargetRef = useRef(null);
@@ -53,7 +54,7 @@ const StickerPeel = ({
 
     draggableInstanceRef.current = Draggable.create(target, {
       type: 'x,y',
-      bounds: boundsEl,
+      ...(clampOnResize && { bounds: boundsEl }),
       inertia: true,
       onDrag() {
         const rot = gsap.utils.clamp(-24, 24, this.deltaX * 0.4);
@@ -74,6 +75,7 @@ const StickerPeel = ({
     const handleResize = () => {
       if (draggableInstanceRef.current) {
         draggableInstanceRef.current.update();
+        if (!clampOnResize) return;
 
         const currentX = gsap.getProperty(target, 'x');
         const currentY = gsap.getProperty(target, 'y');

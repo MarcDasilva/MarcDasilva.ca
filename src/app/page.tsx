@@ -20,13 +20,21 @@ export const STICKERS: StickerConfig[] = [
   { id: "mlh", src: "/mlh_sticker.png", rotate: -8 },
 ];
 
+const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
+  calcifer: { x: 1258, y: 0 },
+  goose: { x: 1088, y: 1 },
+  mlh: { x: 1248, y: 233 },
+};
+
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showContent, setShowContent] = useState(false);
   const [stickerPositions, setStickerPositions] = useState<
     { x: number; y: number }[]
   >([]);
-  const [fallenStickerIndices, setFallenStickerIndices] = useState<number[]>([]);
+  const [fallenStickerIndices, setFallenStickerIndices] = useState<number[]>(
+    [],
+  );
   // Stickers currently playing the fall animation (so we don't block new holds)
   const [animatingOffIndices, setAnimatingOffIndices] = useState<number[]>([]);
   const [resetInstant, setResetInstant] = useState(false);
@@ -64,10 +72,12 @@ export default function Home() {
       const rightX = width - STICKER_SIZE - 40;
       const gap = 20;
       setStickerPositions(
-        STICKERS.map((_, i) => ({
-          x: rightX,
-          y: 20 + i * (STICKER_SIZE + gap),
-        }))
+        STICKERS.map((sticker, i) =>
+          INITIAL_STICKER_POSITIONS[sticker.id] ?? {
+            x: rightX,
+            y: 20 + i * (STICKER_SIZE + gap),
+          }
+        ),
       );
     }
   }, [showContent]);
@@ -140,19 +150,20 @@ export default function Home() {
                         width: "100%",
                         height: "100%",
                         pointerEvents: "none",
+                        zIndex: isFalling ? 100 : undefined,
                       }}
                       initial={{ y: 0, rotate: 0, opacity: 1 }}
                       animate={
                         isFalling
                           ? {
                               y: "150vh",
-                              rotate: 120,
+                              rotate: 0,
                               opacity: 0,
                             }
                           : { y: 0, rotate: 0, opacity: 1 }
                       }
                       transition={{
-                        duration: resetInstant ? 0 : 2,
+                        duration: resetInstant ? 0 : 1.7,
                         ease: [0.25, 0.46, 0.45, 0.94],
                       }}
                       onPointerDownCapture={(e) => {
@@ -196,19 +207,22 @@ export default function Home() {
                         width={STICKER_SIZE}
                         initialPosition={pos as any}
                         peelDirection={0}
+                        clampOnResize={false}
                         onDragEnd={(x: number, y: number) => {
-                          const rounded = { x: Math.round(x), y: Math.round(y) };
+                          const rounded = {
+                            x: Math.round(x),
+                            y: Math.round(y),
+                          };
                           setStickerPositions((prev) => {
                             const next = [...prev];
                             if (next[i] !== undefined) next[i] = rounded;
-                            const byId = STICKERS.reduce<Record<string, { x: number; y: number }>>(
-                              (acc, s, idx) => {
-                                const p = next[idx];
-                                if (p != null) acc[s.id] = p;
-                                return acc;
-                              },
-                              {}
-                            );
+                            const byId = STICKERS.reduce<
+                              Record<string, { x: number; y: number }>
+                            >((acc, s, idx) => {
+                              const p = next[idx];
+                              if (p != null) acc[s.id] = p;
+                              return acc;
+                            }, {});
                             console.log(`Sticker "${sticker.id}" →`, rounded);
                             console.log("All sticker positions:", byId);
                             return next;
@@ -314,7 +328,7 @@ export default function Home() {
                             style={{ display: "inline-block" }}
                           />
                           <span className="relative">
-                              UWaterloo
+                            UWaterloo
                             <div
                               className="absolute bottom-0 left-0 bg-gray-400"
                               style={{ width: "100%", height: "1px" }}
