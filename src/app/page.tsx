@@ -20,12 +20,9 @@ export default function Home() {
     { x: number; y: number }[]
   >([]);
   const [fallenStickerIndices, setFallenStickerIndices] = useState<number[]>([]);
-  const [fallingStickerIndex, setFallingStickerIndex] = useState<number | null>(
-    null
-  );
-  const [returningStickerIndices, setReturningStickerIndices] = useState<
-    number[]
-  >([]);
+  // Stickers currently playing the fall animation (so we don't block new holds)
+  const [animatingOffIndices, setAnimatingOffIndices] = useState<number[]>([]);
+  const [resetInstant, setResetInstant] = useState(false);
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -71,14 +68,19 @@ export default function Home() {
   }, [showContent]);
 
   useEffect(() => {
+    if (!resetInstant) return;
+    const id = requestAnimationFrame(() => setResetInstant(false));
+    return () => cancelAnimationFrame(id);
+  }, [resetInstant]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!e.shiftKey) return;
       if (e.key === "P" || e.key === "p") {
         e.preventDefault();
-        const toReturn = [...fallenStickerIndices];
-        setReturningStickerIndices(toReturn);
+        setResetInstant(true);
         setFallenStickerIndices([]);
-        setFallingStickerIndex(null);
+        setAnimatingOffIndices([]);
         if (holdTimeoutRef.current) {
           clearTimeout(holdTimeoutRef.current);
           holdTimeoutRef.current = null;
@@ -122,8 +124,7 @@ export default function Home() {
                   if (fallenStickerIndices.includes(i)) return null;
                   const pos = stickerPositions[i];
                   if (!pos) return null;
-                  const isFalling = fallingStickerIndex === i;
-                  const isReturning = returningStickerIndices.includes(i);
+                  const isFalling = animatingOffIndices.includes(i);
                   return (
                     <motion.div
                       key={i}
@@ -135,11 +136,7 @@ export default function Home() {
                         height: STICKER_SIZE,
                         pointerEvents: "auto",
                       }}
-                      initial={
-                        isReturning
-                          ? { y: -180, rotate: -20, opacity: 0 }
-                          : { y: 0, rotate: 0, opacity: 1 }
-                      }
+                      initial={{ y: 0, rotate: 0, opacity: 1 }}
                       animate={
                         isFalling
                           ? {
@@ -147,18 +144,15 @@ export default function Home() {
                               rotate: 120,
                               opacity: 0,
                             }
-                          : isReturning
-                            ? { y: 0, rotate: 0, opacity: 1 }
-                            : { y: 0, rotate: 0, opacity: 1 }
+                          : { y: 0, rotate: 0, opacity: 1 }
                       }
                       transition={{
-                        duration: isReturning ? 0.8 : 2,
+                        duration: resetInstant ? 0 : 2,
                         ease: [0.25, 0.46, 0.45, 0.94],
                       }}
                       onPointerDownCapture={() => {
-                        if (fallingStickerIndex !== null || isReturning) return;
                         holdTimeoutRef.current = setTimeout(() => {
-                          setFallingStickerIndex(i);
+                          setAnimatingOffIndices((prev) => [...prev, i]);
                           holdTimeoutRef.current = null;
                         }, 300);
                       }}
@@ -168,7 +162,7 @@ export default function Home() {
                           holdTimeoutRef.current = null;
                         }
                       }}
-                      onPointerLeave={() => {
+                      onPointerCancel={() => {
                         if (holdTimeoutRef.current) {
                           clearTimeout(holdTimeoutRef.current);
                           holdTimeoutRef.current = null;
@@ -181,15 +175,13 @@ export default function Home() {
                         }
                       }}
                       onAnimationComplete={() => {
-                        if (fallingStickerIndex === i) {
-                          setFallenStickerIndices((prev) => [...prev, i]);
-                          setFallingStickerIndex(null);
-                        }
-                        if (isReturning) {
-                          setReturningStickerIndices((prev) =>
-                            prev.filter((j) => j !== i)
-                          );
-                        }
+                        setAnimatingOffIndices((prev) => {
+                          if (prev.includes(i)) {
+                            setFallenStickerIndices((f) => [...f, i]);
+                            return prev.filter((j) => j !== i);
+                          }
+                          return prev;
+                        });
                       }}
                     >
                       <StickerPeel
