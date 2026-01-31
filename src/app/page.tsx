@@ -821,8 +821,8 @@ export default function Home() {
                           <Image
                             src="/uoft.png"
                             alt="Uoft"
-                            width={40}
-                            height={40}
+                            width={30}
+                            height={30}
                             className="shrink-0"
                           />
                           <span className="relative">
