@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import DotBackground from "@/components/DotBackground";
 import Image from "next/image";
 import StickerPeel from "@/components/StickerPeel";
-import { Button } from "@/components/ui/button";
 
 const STICKER_SIZE = 240;
 const DESIGN_WIDTH = 1920;
@@ -16,6 +15,7 @@ export type StickerConfig = {
   src: string;
   rotate?: number;
   width?: number;
+  href?: string;
 };
 
 export const STICKERS: StickerConfig[] = [
@@ -39,13 +39,26 @@ export const STICKERS: StickerConfig[] = [
   { id: "mongodb", src: "/stickers/mongodb.png", rotate: 7, width: 350 },
   { id: "postgres", src: "/stickers/postgres.png", rotate: 8, width: 250 },
   { id: "sunny", src: "/stickers/sunny.png", rotate: -5, width: 200 },
-  { id: "github", src: "/stickers/github.png", rotate: -6, width: 230 },
-  { id: "devpost", src: "/stickers/devpost.png", rotate: 6, width: 200 },
+  {
+    id: "github",
+    src: "/stickers/github.png",
+    rotate: -6,
+    width: 230,
+    href: "https://github.com/MarcDasilva",
+  },
+  {
+    id: "devpost",
+    src: "/stickers/devpost.png",
+    rotate: 6,
+    width: 200,
+    href: "https://devpost.com/marcdasilva234",
+  },
   {
     id: "linkedin",
     src: "/stickers/linkedinsticker.png",
     rotate: 7,
     width: 170,
+    href: "https://www.linkedin.com/in/marcdasilva1/",
   },
   { id: "next", src: "/stickers/next.png", rotate: -8, width: 300 },
   { id: "docker", src: "/stickers/docker.png", rotate: -7, width: 250 },
@@ -53,6 +66,7 @@ export const STICKERS: StickerConfig[] = [
   { id: "pytorch", src: "/stickers/pytorch.png", rotate: -9, width: 220 },
   { id: "tailwind", src: "/stickers/tailwind.png", rotate: 8, width: 220 },
   { id: "barbell", src: "/stickers/barbell.png", rotate: 8, width: 320 },
+  { id: "hover", src: "/stickers/hover.png", rotate: -20, width: 320 },
 ];
 
 function getInitialStickerPositions() {
@@ -77,14 +91,14 @@ const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
   bee: { x: 383, y: 4 },
   calcifer: { x: 1661, y: -17 },
   chess: { x: 1253, y: 98 },
-  devpost: { x: 644, y: 844 },
+  devpost: { x: 637, y: 811 },
   docker: { x: 396, y: 430 },
   fast: { x: 217, y: 610 },
   git: { x: 164, y: 94 },
-  github: { x: 853, y: 826 },
+  github: { x: 845, y: 768 },
   goose: { x: 1631, y: 634 },
   hackpton: { x: 39, y: 484 },
-  linkedin: { x: 1115, y: 854 },
+  linkedin: { x: 1110, y: 829 },
   linux: { x: 1500, y: 536 },
   loveworm: { x: 1675, y: 372 },
   mlh: { x: 1666, y: 227 },
@@ -100,6 +114,7 @@ const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
   spotify: { x: 419, y: 211 },
   sunny: { x: 20, y: 232 },
   tailwind: { x: 410, y: 719 },
+  hover: { x: 1103, y: 565 },
 };
 
 export default function Home() {
@@ -119,6 +134,10 @@ export default function Home() {
     h: DESIGN_HEIGHT,
   });
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tapStickerRef = useRef<{ index: number; moved: boolean }>({
+    index: -1,
+    moved: false,
+  });
 
   useEffect(() => {
     const updateSize = () =>
@@ -262,24 +281,41 @@ export default function Home() {
                       }}
                       onPointerDownCapture={(e) => {
                         if (e.shiftKey) return;
+                        if (sticker.href)
+                          tapStickerRef.current = { index: i, moved: false };
                         holdTimeoutRef.current = setTimeout(() => {
                           setAnimatingOffIndices((prev) => [...prev, i]);
                           holdTimeoutRef.current = null;
                         }, 300);
                       }}
                       onPointerUpCapture={() => {
+                        if (
+                          tapStickerRef.current.index === i &&
+                          !tapStickerRef.current.moved &&
+                          sticker.href
+                        ) {
+                          window.open(
+                            sticker.href,
+                            "_blank",
+                            "noopener,noreferrer",
+                          );
+                        }
+                        tapStickerRef.current = { index: -1, moved: false };
                         if (holdTimeoutRef.current) {
                           clearTimeout(holdTimeoutRef.current);
                           holdTimeoutRef.current = null;
                         }
                       }}
                       onPointerCancel={() => {
+                        tapStickerRef.current = { index: -1, moved: false };
                         if (holdTimeoutRef.current) {
                           clearTimeout(holdTimeoutRef.current);
                           holdTimeoutRef.current = null;
                         }
                       }}
                       onPointerMoveCapture={() => {
+                        if (tapStickerRef.current.index === i)
+                          tapStickerRef.current.moved = true;
                         if (holdTimeoutRef.current) {
                           clearTimeout(holdTimeoutRef.current);
                           holdTimeoutRef.current = null;
@@ -344,25 +380,15 @@ export default function Home() {
               >
                 {/* Header */}
                 <div className="mb-4" style={{ marginBottom: "1.2em" }}>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="font-normal"
-                      style={{
-                        fontSize: "4em",
-                        fontFamily: "var(--font-script)",
-                        marginTop: "1em",
-                      }}
-                    >
-                      marc dasilva
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 mt-20 border-2 border-black/80 bg-black/5 px-5 py-3 text-lg font-medium text-black/80 hover:bg-black/10 hover:text-black"
-                      title="Copy name (⌘X)"
-                    >
-                      ⌘ + X
-                    </Button>
+                  <div
+                    className="font-normal"
+                    style={{
+                      fontSize: "4em",
+                      fontFamily: "var(--font-script)",
+                      marginTop: "1em",
+                    }}
+                  >
+                    marc dasilva
                   </div>
                   <motion.div
                     className="cursor-pointer"
@@ -698,7 +724,11 @@ export default function Home() {
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                       />
                       Created{" "}
-                      <motion.strong className="relative cursor-default inline" whileHover="hover" initial="initial">
+                      <motion.strong
+                        className="relative cursor-default inline"
+                        whileHover="hover"
+                        initial="initial"
+                      >
                         Kijiji for Food Donations
                         <span
                           className="absolute bottom-0 left-0 bg-gray-400 block"
