@@ -38,21 +38,47 @@ export const STICKERS: StickerConfig[] = [
   { id: "mongodb", src: "/stickers/mongodb.png", rotate: -7, width: 300 },
   { id: "postgres", src: "/stickers/postgres.png", rotate: 8, width: 250 },
   { id: "sunny", src: "/stickers/sunny.png", rotate: -5, width: 200 },
+  { id: "github", src: "/stickers/github.png", rotate: -6, width: 170 },
+  {
+    id: "linkedin",
+    src: "/stickers/linkedinsticker.png",
+    rotate: 7,
+    width: 170,
+  },
+  { id: "next", src: "/stickers/next.png", rotate: -8, width: 250 },
 ];
+
+function getInitialStickerPositions() {
+  const centerX = DESIGN_WIDTH / 2 - STICKER_SIZE / 2;
+  const centerY = DESIGN_HEIGHT / 2 - STICKER_SIZE / 2;
+  let centerOffset = 0;
+  return STICKERS.map((sticker) => {
+    const existing = INITIAL_STICKER_POSITIONS[sticker.id];
+    if (existing) return existing;
+    const offset = centerOffset++;
+    return {
+      x: centerX + (offset % 3) * 100 - 100,
+      y: centerY + Math.floor(offset / 3) * 100 - 100,
+    };
+  });
+}
 
 const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
   apple: { x: 1444, y: 21 },
   aws: { x: 1699, y: 912 },
-  babymilo: { x: 1238, y: 77 },
+  babymilo: { x: 1253, y: 98 },
   bee: { x: 383, y: 4 },
   calcifer: { x: 1661, y: -17 },
   git: { x: 164, y: 94 },
+  github: { x: 877, y: 59 },
   goose: { x: 1631, y: 634 },
   hackpton: { x: 46, y: 498 },
+  linkedin: { x: 1070, y: 74 },
   linux: { x: 1500, y: 536 },
   loveworm: { x: 1675, y: 372 },
   mlh: { x: 1666, y: 227 },
   mongodb: { x: 574, y: -52 },
+  next: { x: 631, y: 84 },
   node: { x: 1333, y: 671 },
   ny: { x: 1313, y: 439 },
   postgres: { x: 200, y: 359 },
@@ -100,6 +126,7 @@ export default function Home() {
       // Show content after a brief delay
       setTimeout(() => {
         setShowContent(true);
+        setStickerPositions(getInitialStickerPositions());
       }, 500);
     };
 
@@ -114,25 +141,6 @@ export default function Home() {
       video.removeEventListener("ended", handleEnded);
     };
   }, []);
-
-  useEffect(() => {
-    if (showContent && typeof window !== "undefined") {
-      const centerX = DESIGN_WIDTH / 2 - STICKER_SIZE / 2;
-      const centerY = DESIGN_HEIGHT / 2 - STICKER_SIZE / 2;
-      let centerOffset = 0;
-      setStickerPositions(
-        STICKERS.map((sticker) => {
-          const existing = INITIAL_STICKER_POSITIONS[sticker.id];
-          if (existing) return existing;
-          const offset = centerOffset++;
-          return {
-            x: centerX + (offset % 3) * 100 - 100,
-            y: centerY + Math.floor(offset / 3) * 100 - 100,
-          };
-        }),
-      );
-    }
-  }, [showContent]);
 
   useEffect(() => {
     if (!resetInstant) return;
@@ -160,6 +168,7 @@ export default function Home() {
           video.currentTime = video.duration;
         }
         setShowContent(true);
+        setStickerPositions(getInitialStickerPositions());
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -173,30 +182,30 @@ export default function Home() {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black">
-      <div
-        className="absolute left-1/2 top-1/2 origin-center"
-        style={{
-          width: DESIGN_WIDTH,
-          height: DESIGN_HEIGHT,
-          transform: `translate(-50%, -50%) scale(${scale})`,
-          transformOrigin: "center center",
-        }}
-      >
-        <div className="relative w-full h-full flex items-center justify-center">
-          <video
-            ref={videoRef}
-            src="/landinglatest.mp4"
-            autoPlay
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-            style={{ width: DESIGN_WIDTH, height: DESIGN_HEIGHT }}
-          />
+      {/* Video: always maximized via CSS (inset-0 + object-cover), no JS scale.
+          Fills viewport from first paint—avoids aspect ratio jump on load. */}
+      <video
+        ref={videoRef}
+        src="/landinglatest.mp4"
+        autoPlay
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      />
 
-          {showContent && (
-            <>
-              <DotBackground className="fade-in" />
-              {/* Stickers above marc dasilva text */}
+      {showContent && (
+        <div
+          className="absolute left-1/2 top-1/2 origin-center"
+          style={{
+            width: DESIGN_WIDTH,
+            height: DESIGN_HEIGHT,
+            transform: `translate(-50%, -50%) scale(${scale})`,
+            transformOrigin: "center center",
+          }}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            <DotBackground className="fade-in" />
+            {/* Stickers above marc dasilva text */}
               {stickerPositions.length > 0 && (
                 <div
                   className="absolute top-0 left-0 fade-in"
@@ -668,10 +677,9 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </>
-          )}
-        </div>
-      </div>
+            </div>
+          </div>
+      )}
     </div>
   );
 }
