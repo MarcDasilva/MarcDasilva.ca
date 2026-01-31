@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import DotBackground from "@/components/DotBackground";
 import Image from "next/image";
 import StickerPeel from "@/components/StickerPeel";
+import { Button } from "@/components/ui/button";
 
 const STICKER_SIZE = 240;
 const DESIGN_WIDTH = 1920;
@@ -76,19 +77,19 @@ const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
   bee: { x: 383, y: 4 },
   calcifer: { x: 1661, y: -17 },
   chess: { x: 1253, y: 98 },
-  devpost: { x: 627, y: 77 },
+  devpost: { x: 644, y: 844 },
   docker: { x: 396, y: 430 },
   fast: { x: 217, y: 610 },
   git: { x: 164, y: 94 },
-  github: { x: 830, y: 19 },
+  github: { x: 853, y: 826 },
   goose: { x: 1631, y: 634 },
   hackpton: { x: 39, y: 484 },
-  linkedin: { x: 1072, y: 107 },
+  linkedin: { x: 1115, y: 854 },
   linux: { x: 1500, y: 536 },
   loveworm: { x: 1675, y: 372 },
   mlh: { x: 1666, y: 227 },
-  mongodb: { x: 935, y: 814 },
-  next: { x: 629, y: 840 },
+  mongodb: { x: 952, y: -70 },
+  next: { x: 656, y: -40 },
   node: { x: 1316, y: 657 },
   ny: { x: 1313, y: 439 },
   postgres: { x: 200, y: 346 },
@@ -327,7 +328,10 @@ export default function Home() {
                 })}
               </div>
             )}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              style={{ paddingBottom: "15vh" }}
+            >
               <div
                 className="text-black fade-in relative pointer-events-auto"
                 style={{
@@ -335,27 +339,67 @@ export default function Home() {
                   maxHeight: "clamp(440px, 88vh, 880px)",
                   padding: "clamp(14px, 3.2vw, 28px) clamp(18px, 4.5vw, 36px)",
                   fontSize: "clamp(12px, 2vw, 16px)",
-                  overflow: "auto",
+                  overflow: "visible",
                 }}
               >
                 {/* Header */}
-                <div
-                  className="flex items-center justify-between mb-4"
-                  style={{ marginBottom: "1.2em" }}
-                >
-                  <div>
+                <div className="mb-4" style={{ marginBottom: "1.2em" }}>
+                  <div className="flex items-center gap-3">
                     <div
                       className="font-normal"
                       style={{
-                        fontSize: "3.5em",
+                        fontSize: "4em",
                         fontFamily: "var(--font-script)",
-                        marginTop: "2em",
+                        marginTop: "1em",
                       }}
                     >
                       marc dasilva
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 mt-20 border-2 border-black/80 bg-black/5 px-5 py-3 text-lg font-medium text-black/80 hover:bg-black/10 hover:text-black"
+                      title="Copy name (⌘X)"
+                    >
+                      ⌘ + X
+                    </Button>
+                  </div>
+                  <motion.div
+                    className="cursor-pointer"
+                    whileHover="hover"
+                    initial="initial"
+                    variants={{
+                      initial: { x: 0 },
+                      hover: { x: 5 },
+                    }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
+                    <div
+                      className="flex items-center gap-2"
+                      style={{
+                        fontSize: "1.2em",
+                        marginTop: ".5em",
+                        marginBottom: "0",
+                        fontWeight: "bold",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Currently
+                      <Image
+                        src="/9923735.png"
+                        alt="Icon"
+                        width={20}
+                        height={20}
+                      />
+                    </div>
                     <motion.div
-                      className="cursor-pointer"
+                      className="flex cursor-pointer items-center gap-1"
+                      style={{
+                        fontSize: "1.2em",
+                        padding: "0.25em 0.5em",
+                        marginLeft: "1.5em",
+                        marginTop: "0",
+                      }}
                       whileHover="hover"
                       initial="initial"
                       variants={{
@@ -364,328 +408,476 @@ export default function Home() {
                       }}
                       transition={{ duration: 0.4, ease: "easeInOut" }}
                     >
-                      <div
-                        className="flex items-center gap-2"
+                      <motion.div
+                        className="bg-black shrink-0"
                         style={{
-                          fontSize: "1.2em",
-                          marginTop: ".5em",
-                          marginBottom: "0",
-                          fontWeight: "bold",
-                          fontStyle: "italic",
+                          width: "0.35em",
+                          height: "0.35em",
                         }}
+                        variants={{
+                          initial: { rotate: 0 },
+                          hover: { rotate: 45 },
+                        }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                      />
+                      <span>BME + SE</span>
+                      <motion.a
+                        href="https://uwaterloo.ca/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-0.5 relative group cursor-pointer"
+                        whileHover="hover"
+                        initial="initial"
+                        style={{ padding: "0.1em 0.1em" }}
                       >
-                        Currently
                         <Image
-                          src="/9923735.png"
-                          alt="Icon"
+                          src="/uwaterloo.png"
+                          alt="UWaterloo"
                           width={20}
                           height={20}
+                          style={{ display: "inline-block" }}
                         />
-                      </div>
-                      <motion.div
-                        className="flex items-center gap-1"
-                        style={{
-                          fontSize: "1.2em",
-                          padding: "0.25em 0.5em",
-                          marginLeft: "1.5em",
-                          marginTop: "0",
-                        }}
-                      >
-                        <motion.div
-                          className="bg-black"
-                          style={{
-                            width: "0.35em",
-                            height: "0.35em",
-                          }}
-                          variants={{
-                            initial: { rotate: 0 },
-                            hover: { rotate: 45 },
-                          }}
-                          transition={{ duration: 0.4, ease: "easeInOut" }}
-                        />
-                        <span>BME </span>
-                        <motion.a
-                          href="https://uwaterloo.ca/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-0.5 relative group cursor-pointer"
-                          whileHover="hover"
-                          initial="initial"
-                          style={{ padding: "0.1em 0.1em" }}
-                        >
-                          <Image
-                            src="/uwaterloo.png"
-                            alt="UWaterloo"
-                            width={20}
-                            height={20}
-                            style={{ display: "inline-block" }}
+                        <span className="relative">
+                          UWaterloo
+                          <div
+                            className="absolute bottom-0 left-0 bg-gray-400"
+                            style={{ width: "100%", height: "1px" }}
                           />
-                          <span className="relative">
-                            UWaterloo
-                            <div
-                              className="absolute bottom-0 left-0 bg-gray-400"
-                              style={{ width: "100%", height: "1px" }}
-                            />
-                            <motion.div
-                              className="absolute bottom-0 left-0 h-0.5 bg-black z-10"
-                              variants={{
-                                initial: { width: 0 },
-                                hover: { width: "100%" },
-                              }}
-                              transition={{
-                                duration: 0.2,
-                                ease: "easeInOut",
-                              }}
-                            />
-                          </span>
-                        </motion.a>
-                      </motion.div>
-                      <motion.div
-                        className="flex items-center gap-1"
-                        style={{
-                          fontSize: "1.2em",
-                          padding: "0.25em 0.5em",
-                          marginLeft: "1.5em",
-                          marginTop: "-0.3em",
-                        }}
-                      >
-                        <motion.div
-                          className="bg-black"
-                          style={{
-                            width: "0.35em",
-                            height: "0.35em",
-                          }}
-                          variants={{
-                            initial: { rotate: 0 },
-                            hover: { rotate: 45 },
-                          }}
-                          transition={{ duration: 0.4, ease: "easeInOut" }}
-                        />
-                        <span>SWE</span>
-                        <motion.a
-                          href="https://afflo.io/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-0.5 relative group cursor-pointer"
-                          whileHover="hover"
-                          initial="initial"
-                          style={{ padding: "0.1em 0.1em" }}
-                        >
-                          <Image
-                            src="/afflo.png"
-                            alt="Afflo"
-                            width={20}
-                            height={20}
-                            style={{ display: "inline-block" }}
+                          <motion.div
+                            className="absolute bottom-0 left-0 h-0.5 bg-black z-10"
+                            variants={{
+                              initial: { width: 0 },
+                              hover: { width: "100%" },
+                            }}
+                            transition={{
+                              duration: 0.2,
+                              ease: "easeInOut",
+                            }}
                           />
-                          <span className="relative">
-                            afflo
-                            <div
-                              className="absolute bottom-0 left-0 bg-gray-400"
-                              style={{ width: "100%", height: "1px" }}
-                            />
-                            <motion.div
-                              className="absolute bottom-0 left-0 h-0.5 bg-black z-10"
-                              variants={{
-                                initial: { width: 0 },
-                                hover: { width: "100%" },
-                              }}
-                              transition={{
-                                duration: 0.2,
-                                ease: "easeInOut",
-                              }}
-                            />
-                          </span>
-                        </motion.a>
-                      </motion.div>
+                        </span>
+                      </motion.a>
                     </motion.div>
-                  </div>
-                  <div
-                    className="flex items-center gap-2 sm:gap-3"
-                    style={{ fontSize: "0.9em" }}
-                  >
-                    <a
-                      href="#"
-                      className="underline hover:text-black/80 transition-colors"
-                    >
-                      about
-                    </a>
-                    <a
-                      href="#"
-                      className="underline hover:text-black/80 transition-colors"
-                    >
-                      projects
-                    </a>
-                    <a
-                      href="#"
-                      className="underline hover:text-black/80 transition-colors"
-                    >
-                      writing
-                    </a>
-                    <button
-                      className="flex items-center justify-center hover:opacity-80 transition-opacity"
+                    <motion.div
+                      className="flex cursor-pointer items-center gap-1"
                       style={{
-                        width: "1.4em",
-                        height: "1.4em",
+                        fontSize: "1.2em",
+                        padding: "0.25em 0.5em",
+                        marginLeft: "1.5em",
+                        marginTop: "-0.3em",
                       }}
+                      whileHover="hover"
+                      initial="initial"
+                      variants={{
+                        initial: { x: 0 },
+                        hover: { x: 5 },
+                      }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
                     >
-                      <svg
-                        className="w-full h-full"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
+                      <motion.div
+                        className="bg-black shrink-0"
+                        style={{
+                          width: "0.35em",
+                          height: "0.35em",
+                        }}
+                        variants={{
+                          initial: { rotate: 0 },
+                          hover: { rotate: 45 },
+                        }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                      />
+                      <span>SWE</span>
+                      <motion.a
+                        href="https://afflo.io/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-0.5 relative group cursor-pointer"
+                        whileHover="hover"
+                        initial="initial"
+                        style={{ padding: "0.1em 0.1em" }}
                       >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                          clipRule="evenodd"
+                        <Image
+                          src="/afflo.png"
+                          alt="Afflo"
+                          width={20}
+                          height={20}
+                          style={{ display: "inline-block" }}
                         />
-                      </svg>
-                    </button>
-                    <button
-                      className="bg-gray-700 rounded flex items-center justify-center font-medium hover:bg-gray-600 transition-colors"
-                      style={{
-                        width: "1.8em",
-                        height: "1.8em",
-                        fontSize: "0.85em",
-                      }}
-                    >
-                      K
-                    </button>
-                  </div>
+                        <span className="relative">
+                          afflo
+                          <div
+                            className="absolute bottom-0 left-0 bg-gray-400"
+                            style={{ width: "100%", height: "1px" }}
+                          />
+                          <motion.div
+                            className="absolute bottom-0 left-0 h-0.5 bg-black z-10"
+                            variants={{
+                              initial: { width: 0 },
+                              hover: { width: "100%" },
+                            }}
+                            transition={{
+                              duration: 0.2,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        </span>
+                      </motion.a>
+                    </motion.div>
+                  </motion.div>
                 </div>
 
                 {/* What I've been building */}
-                <div style={{ marginBottom: "1.2em" }}>
+                <motion.div
+                  className="cursor-pointer"
+                  style={{ marginBottom: "1.2em" }}
+                  whileHover="hover"
+                  initial="initial"
+                  variants={{
+                    initial: { x: 0 },
+                    hover: { x: 5 },
+                  }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                >
                   <div
-                    className="font-bold italic"
+                    className="flex items-center gap-2 font-bold italic"
                     style={{ marginBottom: "0.6em", fontSize: "1.2em" }}
                   >
-                    what i've been building:
+                    What I've Been Building
+                    <Image
+                      src="/9923735.png"
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="shrink-0"
+                    />
                   </div>
-                  <ul className="space-y-0.5" style={{ marginLeft: "2em" }}>
-                    <li>
-                      created <strong>Cursor for 3D modeling</strong> (3M+
-                      views, 1,900+ stars, inbound VC interest from Sequoia,
-                      a16z, GC, others)
-                    </li>
-                    <li>
-                      shipped a <strong>product</strong> in &lt; 2 days to
-                      10,000+ users
-                    </li>
-                    <li>
-                      did it again with another <strong>product</strong> (1,000+
-                      users in &lt; 24 hours)
-                    </li>
-                    <li>
-                      built a <strong>deep learning framework</strong> from
-                      scratch in C++
-                    </li>
+                  <ul
+                    className="space-y-0.5"
+                    style={{ marginLeft: "2em", fontSize: "1.2em" }}
+                  >
+                    <motion.li
+                      className="flex cursor-pointer flex-col gap-0"
+                      whileHover="hover"
+                      initial="initial"
+                      variants={{
+                        initial: { x: 0 },
+                        hover: { x: 5 },
+                      }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <div className="flex items-center gap-1">
+                        <motion.div
+                          className="bg-black shrink-0"
+                          style={{
+                            width: "0.35em",
+                            height: "0.35em",
+                          }}
+                          variants={{
+                            initial: { rotate: 0 },
+                            hover: { rotate: 45 },
+                          }}
+                          transition={{ duration: 0.4, ease: "easeInOut" }}
+                        />
+                        <span>
+                          Created{" "}
+                          <motion.strong
+                            style={{ fontStyle: "italic" }}
+                            className="relative cursor-default inline"
+                            whileHover="hover"
+                            initial="initial"
+                          >
+                            Cursor for Cameras
+                            <span
+                              className="absolute bottom-0 left-0 bg-gray-400 block"
+                              style={{ width: "100%", height: "1px" }}
+                            />
+                            <motion.span
+                              className="absolute bottom-0 left-0 h-0.5 bg-black z-10 block"
+                              variants={{
+                                initial: { width: 0 },
+                                hover: { width: "100%" },
+                              }}
+                              transition={{
+                                duration: 0.2,
+                                ease: "easeInOut",
+                              }}
+                            />
+                          </motion.strong>{" "}
+                          @ the biggest hackathon ever
+                        </span>
+                      </div>
+                      <span
+                        className="block"
+                        style={{
+                          marginLeft: "calc(0.35em + 0.25rem)",
+                        }}
+                      >
+                        (1st @ NexHacks, $10,000 prize, Incoming billboard in
+                        NYC)
+                      </span>
+                    </motion.li>
+                    <motion.li
+                      className="flex cursor-pointer flex-col gap-0"
+                      whileHover="hover"
+                      initial="initial"
+                      variants={{
+                        initial: { x: 0 },
+                        hover: { x: 5 },
+                      }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <div className="flex items-center gap-1">
+                        <motion.div
+                          className="bg-black shrink-0"
+                          style={{
+                            width: "0.35em",
+                            height: "0.35em",
+                          }}
+                          variants={{
+                            initial: { rotate: 0 },
+                            hover: { rotate: 45 },
+                          }}
+                          transition={{ duration: 0.4, ease: "easeInOut" }}
+                        />
+                        <span>
+                          Built{" "}
+                          <motion.strong
+                            style={{ fontStyle: "italic" }}
+                            className="relative cursor-default inline"
+                            whileHover="hover"
+                            initial="initial"
+                          >
+                            Shazam for Movies
+                            <span
+                              className="absolute bottom-0 left-0 bg-gray-400 block"
+                              style={{ width: "100%", height: "1px" }}
+                            />
+                            <motion.span
+                              className="absolute bottom-0 left-0 h-0.5 bg-black z-10 block"
+                              variants={{
+                                initial: { width: 0 },
+                                hover: { width: "100%" },
+                              }}
+                              transition={{
+                                duration: 0.2,
+                                ease: "easeInOut",
+                              }}
+                            />
+                          </motion.strong>
+                        </span>
+                      </div>
+                      <span
+                        className="block"
+                        style={{
+                          marginLeft: "calc(0.35em + 0.25rem)",
+                        }}
+                      >
+                        (1500+ Users, 100,000+ Impressions)
+                      </span>
+                    </motion.li>
+
+                    <motion.li
+                      className="flex cursor-pointer items-center gap-1"
+                      whileHover="hover"
+                      initial="initial"
+                      variants={{
+                        initial: { x: 0 },
+                        hover: { x: 5 },
+                      }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <motion.div
+                        className="bg-black shrink-0"
+                        style={{
+                          width: "0.35em",
+                          height: "0.35em",
+                        }}
+                        variants={{
+                          initial: { rotate: 0 },
+                          hover: { rotate: 45 },
+                        }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                      />
+                      Created{" "}
+                      <motion.strong className="relative cursor-default inline" whileHover="hover" initial="initial">
+                        Kijiji for Food Donations
+                        <span
+                          className="absolute bottom-0 left-0 bg-gray-400 block"
+                          style={{ width: "100%", height: "1px" }}
+                        />
+                        <motion.span
+                          className="absolute bottom-0 left-0 h-0.5 bg-black z-10 block"
+                          variants={{
+                            initial: { width: 0 },
+                            hover: { width: "100%" },
+                          }}
+                          transition={{
+                            duration: 0.2,
+                            ease: "easeInOut",
+                          }}
+                        />
+                      </motion.strong>{" "}
+                      @ Princeton
+                    </motion.li>
                   </ul>
-                </div>
+                </motion.div>
 
                 {/* Previously */}
-                <div style={{ marginBottom: "1.2em" }}>
+                <motion.div
+                  className="cursor-pointer"
+                  style={{ marginBottom: "1.2em" }}
+                  whileHover="hover"
+                  initial="initial"
+                  variants={{
+                    initial: { x: 0 },
+                    hover: { x: 5 },
+                  }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                >
                   <div
-                    className="font-bold italic"
-                    style={{ marginBottom: "0.6em", fontSize: "1.2em" }}
+                    className="flex items-center gap-2 font-bold italic"
+                    style={{ marginBottom: "0", fontSize: "1.2em" }}
                   >
-                    previously:
+                    Previously
+                    <Image
+                      src="/9923735.png"
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="shrink-0"
+                    />
                   </div>
-                  <ul className="space-y-0.5" style={{ marginLeft: "2em" }}>
-                    <li className="flex items-center gap-2">
-                      <div
-                        className="bg-green-500 rounded-sm flex items-center justify-center"
-                        style={{
-                          width: "1.2em",
-                          height: "1.2em",
-                          fontSize: "0.7em",
-                        }}
-                      >
-                        🛍
-                      </div>
-                      <a
-                        href="#"
-                        className="underline hover:text-black/80 transition-colors"
-                      >
-                        Shopify
-                      </a>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div
-                        className="bg-red-500 rounded-sm flex items-center justify-center text-white"
-                        style={{
-                          width: "1.2em",
-                          height: "1.2em",
-                          fontSize: "0.75em",
-                        }}
-                      >
-                        B
-                      </div>
-                      <a
-                        href="#"
-                        className="underline hover:text-black/80 transition-colors"
-                      >
-                        Browserbase
-                      </a>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div
-                        className="bg-green-400 rounded-sm flex items-center justify-center"
-                        style={{
-                          width: "1.2em",
-                          height: "1.2em",
-                          fontSize: "0.7em",
-                        }}
-                      >
-                        ☘
-                      </div>
-                      <a
-                        href="#"
-                        className="underline hover:text-black/80 transition-colors"
-                      >
-                        Sunnybrook
-                      </a>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div
-                        className="bg-amber-700 rounded-full flex items-center justify-center text-white"
-                        style={{
-                          width: "1.2em",
-                          height: "1.2em",
-                          fontSize: "0.75em",
-                        }}
-                      >
-                        W
-                      </div>
-                      <a
-                        href="#"
-                        className="underline hover:text-black/80 transition-colors"
-                      >
-                        UWaterloo
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Bottom Button */}
-                <div style={{ marginTop: "1.2em" }}>
-                  <button
-                    className="w-full bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-between transition-colors text-white"
+                  <ul
+                    className="space-y-0"
                     style={{
-                      padding: "0.9em 1.5em",
-                      fontSize: "0.95em",
+                      marginLeft: "1.5em",
+                      marginTop: "-0.15em",
+                      fontSize: "1.2em",
                     }}
                   >
-                    <span>see what i've built</span>
-                    <div
-                      className="border border-white/40"
-                      style={{
-                        width: "0.9em",
-                        height: "0.9em",
+                    <motion.li
+                      className="flex cursor-pointer items-center gap-1"
+                      style={{ padding: "0.25em 0.5em" }}
+                      whileHover="hover"
+                      initial="initial"
+                      variants={{
+                        initial: { x: 0 },
+                        hover: { x: 5 },
                       }}
-                    ></div>
-                  </button>
-                </div>
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <motion.div
+                        className="bg-black shrink-0"
+                        style={{
+                          width: "0.35em",
+                          height: "0.35em",
+                        }}
+                        variants={{
+                          initial: { rotate: 0 },
+                          hover: { rotate: 45 },
+                        }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                      />
+                      <div className="flex items-center gap-0">
+                        <span>Research</span>
+                        <motion.a
+                          href="https://rhse.temertymedicine.utoronto.ca/research"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-0 relative group cursor-pointer"
+                          whileHover="hover"
+                          initial="initial"
+                          style={{ padding: "0.1em 0" }}
+                        >
+                          <Image
+                            src="/uoft.png"
+                            alt="Uoft"
+                            width={40}
+                            height={40}
+                            className="shrink-0"
+                          />
+                          <span className="relative">
+                            Uoft
+                            <div
+                              className="absolute bottom-0 left-0 bg-gray-400"
+                              style={{ width: "100%", height: "1px" }}
+                            />
+                            <motion.div
+                              className="absolute bottom-0 left-0 h-0.5 bg-black z-10"
+                              variants={{
+                                initial: { width: 0 },
+                                hover: { width: "100%" },
+                              }}
+                              transition={{
+                                duration: 0.2,
+                                ease: "easeInOut",
+                              }}
+                            />
+                          </span>
+                        </motion.a>
+                      </div>
+                    </motion.li>
+                    <motion.li
+                      className="flex cursor-pointer items-center gap-1"
+                      style={{
+                        padding: "0.25em 0.5em",
+                        marginTop: "-0.2em",
+                      }}
+                      whileHover="hover"
+                      initial="initial"
+                      variants={{
+                        initial: { x: 0 },
+                        hover: { x: 5 },
+                      }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                    >
+                      <motion.div
+                        className="bg-black shrink-0"
+                        style={{
+                          width: "0.35em",
+                          height: "0.35em",
+                        }}
+                        variants={{
+                          initial: { rotate: 0 },
+                          hover: { rotate: 45 },
+                        }}
+                        transition={{ duration: 0.4, ease: "easeInOut" }}
+                      />
+                      <span>SWE</span>
+                      <motion.div
+                        className="flex items-center gap-0 relative group cursor-default"
+                        whileHover="hover"
+                        initial="initial"
+                        style={{ padding: "0.1em 0" }}
+                      >
+                        <Image
+                          src="/HEI_logo.png"
+                          alt="HEI"
+                          width={40}
+                          height={40}
+                          className="shrink-0"
+                        />
+                        <span className="relative">
+                          HEI
+                          <div
+                            className="absolute bottom-0 left-0 bg-gray-400"
+                            style={{ width: "100%", height: "1px" }}
+                          />
+                          <motion.div
+                            className="absolute bottom-0 left-0 h-0.5 bg-black z-10"
+                            variants={{
+                              initial: { width: 0 },
+                              hover: { width: "100%" },
+                            }}
+                            transition={{
+                              duration: 0.2,
+                              ease: "easeInOut",
+                            }}
+                          />
+                        </span>
+                      </motion.div>
+                    </motion.li>
+                  </ul>
+                </motion.div>
               </div>
             </div>
           </div>

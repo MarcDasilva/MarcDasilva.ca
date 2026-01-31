@@ -33,7 +33,7 @@
     var(--sticker-start) var(--sticker-end)
   );
   transition: clip-path 0.6s ease-out;
-  filter: url(#dropShadow);
+  filter: none;
 }
 
 .sticker-main > * {
