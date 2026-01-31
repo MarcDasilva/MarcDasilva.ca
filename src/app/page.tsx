@@ -807,8 +807,8 @@ export default function Home() {
                         }}
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                       />
-                      <div className="flex items-center gap-0">
-                        <span> Researcher </span>
+                      <div className="flex items-center gap-1">
+                        <span>Researcher</span>
                         <motion.a
                           href="https://rhse.temertymedicine.utoronto.ca/research"
                           target="_blank"
