@@ -51,7 +51,7 @@ export const STICKERS: StickerConfig[] = [
     src: "/stickers/devpost.png",
     rotate: 6,
     width: 200,
-    href: "https://devpost.com/marcdasilva234",
+    href: "https://devpost.com/marcdasilva",
   },
   {
     id: "linkedin",
