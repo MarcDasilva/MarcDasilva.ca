@@ -729,7 +729,7 @@ export default function Home() {
                         whileHover="hover"
                         initial="initial"
                       >
-                        Kijiji for Food Donations
+                        FB For Food Donations
                         <span
                           className="absolute bottom-0 left-0 bg-gray-400 block"
                           style={{ width: "100%", height: "1px" }}
