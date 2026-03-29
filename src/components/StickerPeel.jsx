@@ -203,6 +203,7 @@ const StickerPeel = ({
   const imageProps = {
     src: imageSrc,
     draggable: 'false',
+    fetchPriority: 'high',
     loading: 'eager',
     decoding: 'async',
     onContextMenu: e => e.preventDefault()

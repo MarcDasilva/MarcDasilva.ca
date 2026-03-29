@@ -127,6 +127,7 @@ const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
 
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const preloadedStickerImagesRef = useRef<HTMLImageElement[]>([]);
   const [showContent, setShowContent] = useState(false);
   const [stickersReady, setStickersReady] = useState(false);
   const [stickersInteractive, setStickersInteractive] = useState(false);
@@ -171,32 +172,49 @@ export default function Home() {
     let cancelled = false;
 
     const preloadSticker = (src: string) =>
-      new Promise<void>((resolve) => {
+      new Promise<HTMLImageElement | null>((resolve) => {
         const img = new window.Image();
+        img.loading = "eager";
         img.decoding = "async";
-        img.src = src;
-
-        const finish = () => resolve();
+        if ("fetchPriority" in img) img.fetchPriority = "high";
 
         img.onload = () => {
           if (typeof img.decode === "function") {
-            img.decode().catch(() => undefined).finally(finish);
+            img.decode().catch(() => undefined).finally(() => resolve(img));
             return;
           }
-          finish();
+          resolve(img);
         };
 
-        img.onerror = finish;
+        img.onerror = () => resolve(null);
+        img.src = src;
       });
 
-    Promise.all(STICKER_SOURCES.map(preloadSticker)).finally(() => {
-      if (!cancelled) setStickersReady(true);
+    Promise.all(STICKER_SOURCES.map(preloadSticker)).then((images) => {
+      if (cancelled) return;
+      // Keep the decoded sticker bitmaps alive through the first reveal.
+      preloadedStickerImagesRef.current = images.filter(
+        (image): image is HTMLImageElement => image !== null,
+      );
+      setStickersReady(true);
     });
 
     return () => {
       cancelled = true;
+      preloadedStickerImagesRef.current = [];
     };
   }, []);
+
+  useEffect(() => {
+    if (!showContent) return;
+
+    const releaseDelay = lowEndMode ? 2200 : 1500;
+    const timeoutId = setTimeout(() => {
+      preloadedStickerImagesRef.current = [];
+    }, releaseDelay);
+
+    return () => clearTimeout(timeoutId);
+  }, [lowEndMode, showContent]);
 
   useEffect(() => {
     const updateSize = () =>
