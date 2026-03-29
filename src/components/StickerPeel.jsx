@@ -1,4 +1,5 @@
-import { useRef, useEffect, useMemo } from 'react';
+/* eslint-disable @next/next/no-img-element */
+import { useRef, useEffect, useMemo, useState } from 'react';
 import { gsap } from 'gsap';
 import { Draggable } from 'gsap/Draggable';
 import './StickerPeel.css';
@@ -19,15 +20,46 @@ const StickerPeel = ({
   peelDirection = 0,
   className = '',
   onDragEnd: onDragEndCallback,
-  clampOnResize = true
+  clampOnResize = true,
+  activateAfterMs = 0,
+  disablePeel = false,
+  allowInteraction = true
 }) => {
   const containerRef = useRef(null);
   const dragTargetRef = useRef(null);
-  const pointLightRef = useRef(null);
-  const pointLightFlippedRef = useRef(null);
   const draggableInstanceRef = useRef(null);
+  const [isInteractive, setIsInteractive] = useState(false);
 
   const defaultPadding = 10;
+
+  useEffect(() => {
+    if (!allowInteraction) {
+      setIsInteractive(false);
+      return;
+    }
+
+    let timeoutId = null;
+    let idleId = null;
+
+    const enableInteraction = () => {
+      timeoutId = window.setTimeout(() => {
+        setIsInteractive(true);
+      }, activateAfterMs);
+    };
+
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(enableInteraction, { timeout: 1500 });
+    } else {
+      enableInteraction();
+    }
+
+    return () => {
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
+      if (idleId !== null && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleId);
+      }
+    };
+  }, [activateAfterMs, allowInteraction]);
 
   useEffect(() => {
     const target = dragTargetRef.current;
@@ -49,16 +81,20 @@ const StickerPeel = ({
   }, [initialPosition]);
 
   useEffect(() => {
+    if (!isInteractive) return;
+
     const target = dragTargetRef.current;
+    if (!target || !target.parentNode) return;
+
     const boundsEl = target.parentNode;
 
     draggableInstanceRef.current = Draggable.create(target, {
       type: 'x,y',
       ...(clampOnResize && { bounds: boundsEl }),
-      inertia: true,
+      inertia: false,
       onDrag() {
         const rot = gsap.utils.clamp(-24, 24, this.deltaX * 0.4);
-        gsap.to(target, { rotation: rot, duration: 0.15, ease: 'power1.out' });
+        gsap.set(target, { rotation: rot, force3D: true });
       },
       onDragEnd() {
         const rotationEase = 'power2.out';
@@ -108,36 +144,14 @@ const StickerPeel = ({
       window.removeEventListener('orientationchange', handleResize);
       if (draggableInstanceRef.current) {
         draggableInstanceRef.current.kill();
+        draggableInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [clampOnResize, isInteractive, onDragEndCallback]);
 
   useEffect(() => {
-    const updateLight = e => {
-      const rect = containerRef.current?.getBoundingClientRect();
-      if (!rect) return;
+    if (!isInteractive) return;
 
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      gsap.set(pointLightRef.current, { attr: { x, y } });
-
-      const normalizedAngle = Math.abs(peelDirection % 360);
-      if (normalizedAngle !== 180) {
-        gsap.set(pointLightFlippedRef.current, { attr: { x, y: rect.height - y } });
-      } else {
-        gsap.set(pointLightFlippedRef.current, { attr: { x: -1000, y: -1000 } });
-      }
-    };
-
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('mousemove', updateLight);
-      return () => container.removeEventListener('mousemove', updateLight);
-    }
-  }, [peelDirection]);
-
-  useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
@@ -158,7 +172,7 @@ const StickerPeel = ({
       container.removeEventListener('touchend', handleTouchEnd);
       container.removeEventListener('touchcancel', handleTouchEnd);
     };
-  }, []);
+  }, [isInteractive]);
 
   const cssVars = useMemo(
     () => ({
@@ -186,83 +200,49 @@ const StickerPeel = ({
     ]
   );
 
+  const imageProps = {
+    src: imageSrc,
+    draggable: 'false',
+    loading: 'eager',
+    decoding: 'async',
+    onContextMenu: e => e.preventDefault()
+  };
+
   return (
-    <div className={`draggable ${className}`} ref={dragTargetRef} style={cssVars}>
-      <svg width="0" height="0">
-        <defs>
-          <filter id="pointLight">
-            <feGaussianBlur stdDeviation="1" result="blur" />
-            <feSpecularLighting
-              result="spec"
-              in="blur"
-              specularExponent="100"
-              specularConstant={lightingIntensity}
-              lightingColor="white"
-            >
-              <fePointLight ref={pointLightRef} x="100" y="100" z="300" />
-            </feSpecularLighting>
-            <feComposite in="spec" in2="SourceGraphic" result="lit" />
-            <feComposite in="lit" in2="SourceAlpha" operator="in" />
-          </filter>
+    <div
+      className={`draggable ${className}`}
+      data-sticker-interactive={isInteractive ? 'true' : 'false'}
+      ref={dragTargetRef}
+      style={cssVars}
+    >
+      {isInteractive ? (
+        <div
+          className={disablePeel ? "sticker-static" : "sticker-container"}
+          ref={containerRef}
+        >
+          {disablePeel ? (
+            <img {...imageProps} alt="" className="sticker-image" />
+          ) : (
+            <>
+              <div className="sticker-main">
+                <div className="sticker-lighting">
+                  <img {...imageProps} alt="" className="sticker-image" />
+                </div>
+              </div>
 
-          <filter id="pointLightFlipped">
-            <feGaussianBlur stdDeviation="10" result="blur" />
-            <feSpecularLighting
-              result="spec"
-              in="blur"
-              specularExponent="100"
-              specularConstant={lightingIntensity * 7}
-              lightingColor="white"
-            >
-              <fePointLight ref={pointLightFlippedRef} x="100" y="100" z="300" />
-            </feSpecularLighting>
-            <feComposite in="spec" in2="SourceGraphic" result="lit" />
-            <feComposite in="lit" in2="SourceAlpha" operator="in" />
-          </filter>
-
-          <filter id="dropShadow">
-            <feDropShadow
-              dx="2"
-              dy="4"
-              stdDeviation={3 * shadowIntensity}
-              floodColor="black"
-              floodOpacity={shadowIntensity}
-            />
-          </filter>
-
-          <filter id="expandAndFill">
-            <feOffset dx="0" dy="0" in="SourceAlpha" result="shape" />
-            <feFlood floodColor="rgb(179,179,179)" result="flood" />
-            <feComposite operator="in" in="flood" in2="shape" />
-          </filter>
-        </defs>
-      </svg>
-
-      <div className="sticker-container" ref={containerRef}>
-        <div className="sticker-main">
-          <div className="sticker-lighting">
-            <img
-              src={imageSrc}
-              alt=""
-              className="sticker-image"
-              draggable="false"
-              onContextMenu={e => e.preventDefault()}
-            />
-          </div>
+              <div className="flap">
+                <div className="flap-lighting">
+                  <img {...imageProps} alt="" className="flap-image" />
+                </div>
+              </div>
+            </>
+          )}
         </div>
-
-        <div className="flap">
-          <div className="flap-lighting">
-            <img
-              src={imageSrc}
-              alt=""
-              className="flap-image"
-              draggable="false"
-              onContextMenu={e => e.preventDefault()}
-            />
-          </div>
+      ) : (
+        <div className="sticker-static">
+          <img {...imageProps} alt="" className="sticker-image" />
         </div>
-      </div>
+      )}
     </div>
   );
 };

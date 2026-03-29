@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import DotBackground from "@/components/DotBackground";
 import Image from "next/image";
@@ -9,6 +9,11 @@ import StickerPeel from "@/components/StickerPeel";
 const STICKER_SIZE = 240;
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
+const CONTENT_REVEAL_DELAY_MS = 0;
+const STICKER_INTERACTION_GATE_MS = 700;
+const STICKER_INTERACTION_GATE_LOW_END_MS = 1100;
+const STICKER_INTERACTION_STAGGER_MS = 70;
+const STICKER_INTERACTION_STAGGER_LOW_END_MS = 130;
 
 export type StickerConfig = {
   id: string;
@@ -16,6 +21,7 @@ export type StickerConfig = {
   rotate?: number;
   width?: number;
   href?: string;
+  disablePeel?: boolean;
 };
 
 export const STICKERS: StickerConfig[] = [
@@ -57,7 +63,7 @@ export const STICKERS: StickerConfig[] = [
     id: "linkedin",
     src: "/stickers/linkedinsticker.png",
     rotate: 7,
-    width: 170,
+    width: 210,
     href: "https://www.linkedin.com/in/marcdasilva1/",
   },
   { id: "next", src: "/stickers/next.png", rotate: -8, width: 300 },
@@ -68,6 +74,8 @@ export const STICKERS: StickerConfig[] = [
   { id: "barbell", src: "/stickers/barbell.png", rotate: 8, width: 320 },
   { id: "hover", src: "/stickers/hover.png", rotate: -20, width: 320 },
 ];
+
+const STICKER_SOURCES = STICKERS.map((sticker) => sticker.src);
 
 function getInitialStickerPositions() {
   const centerX = DESIGN_WIDTH / 2 - STICKER_SIZE / 2;
@@ -120,6 +128,8 @@ const INITIAL_STICKER_POSITIONS: Record<string, { x: number; y: number }> = {
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showContent, setShowContent] = useState(false);
+  const [stickersReady, setStickersReady] = useState(false);
+  const [stickersInteractive, setStickersInteractive] = useState(false);
   const [stickerPositions, setStickerPositions] = useState<
     { x: number; y: number }[]
   >([]);
@@ -134,10 +144,59 @@ export default function Home() {
     h: DESIGN_HEIGHT,
   });
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const interactionGateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const tapStickerRef = useRef<{ index: number; moved: boolean }>({
     index: -1,
     moved: false,
   });
+  const revealPendingRef = useRef(false);
+
+  const lowEndMode = useMemo(() => {
+    if (typeof window === "undefined") return false;
+
+    const reducedMotion = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const cores = navigator.hardwareConcurrency ?? 8;
+    const memory = (navigator as Navigator & { deviceMemory?: number })
+      .deviceMemory;
+
+    return reducedMotion || cores <= 4 || (memory !== undefined && memory <= 4);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const preloadSticker = (src: string) =>
+      new Promise<void>((resolve) => {
+        const img = new window.Image();
+        img.decoding = "async";
+        img.src = src;
+
+        const finish = () => resolve();
+
+        img.onload = () => {
+          if (typeof img.decode === "function") {
+            img.decode().catch(() => undefined).finally(finish);
+            return;
+          }
+          finish();
+        };
+
+        img.onerror = finish;
+      });
+
+    Promise.all(STICKER_SOURCES.map(preloadSticker)).finally(() => {
+      if (!cancelled) setStickersReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const updateSize = () =>
@@ -151,15 +210,22 @@ export default function Home() {
     const video = videoRef.current;
     if (!video) return;
 
+    const revealContent = () => {
+      if (revealPendingRef.current) return;
+      revealPendingRef.current = true;
+      revealTimeoutRef.current = setTimeout(() => {
+        setShowContent(true);
+        setStickerPositions(getInitialStickerPositions());
+      }, CONTENT_REVEAL_DELAY_MS);
+    };
+
     const handleEnded = () => {
       // Freeze on last frame by pausing and setting to the end
       video.pause();
       video.currentTime = video.duration;
-      // Show content after a brief delay
-      setTimeout(() => {
-        setShowContent(true);
-        setStickerPositions(getInitialStickerPositions());
-      }, 500);
+
+      if (stickersReady) revealContent();
+      else revealPendingRef.current = true;
     };
 
     video.addEventListener("ended", handleEnded);
@@ -171,8 +237,41 @@ export default function Home() {
 
     return () => {
       video.removeEventListener("ended", handleEnded);
+      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
     };
-  }, []);
+  }, [stickersReady]);
+
+  useEffect(() => {
+    if (!stickersReady || !revealPendingRef.current || showContent) return;
+
+    revealTimeoutRef.current = setTimeout(() => {
+      setShowContent(true);
+      setStickerPositions(getInitialStickerPositions());
+    }, CONTENT_REVEAL_DELAY_MS);
+
+    return () => {
+      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+    };
+  }, [showContent, stickersReady]);
+
+  useEffect(() => {
+    if (!showContent) return;
+
+    const gateDelay = lowEndMode
+      ? STICKER_INTERACTION_GATE_LOW_END_MS
+      : STICKER_INTERACTION_GATE_MS;
+
+    interactionGateTimeoutRef.current = setTimeout(() => {
+      setStickersInteractive(true);
+    }, gateDelay);
+
+    return () => {
+      if (interactionGateTimeoutRef.current) {
+        clearTimeout(interactionGateTimeoutRef.current);
+        interactionGateTimeoutRef.current = null;
+      }
+    };
+  }, [lowEndMode, showContent]);
 
   useEffect(() => {
     if (!resetInstant) return;
@@ -211,6 +310,14 @@ export default function Home() {
     viewportSize.w / DESIGN_WIDTH,
     viewportSize.h / DESIGN_HEIGHT,
   );
+  const fallenStickerSet = useMemo(
+    () => new Set(fallenStickerIndices),
+    [fallenStickerIndices],
+  );
+  const animatingStickerSet = useMemo(
+    () => new Set(animatingOffIndices),
+    [animatingOffIndices],
+  );
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black">
@@ -218,12 +325,18 @@ export default function Home() {
           Fills viewport from first paint—avoids aspect ratio jump on load. */}
       <video
         ref={videoRef}
-        src="/landinglatest.mp4"
         autoPlay
         muted
         playsInline
+        preload="auto"
         className="absolute inset-0 w-full h-full object-cover"
-      />
+      >
+        <source
+          src="/marcdasilvalatestlatest.hevc-backup.mp4"
+          type='video/mp4; codecs="hvc1"'
+        />
+        <source src="/marcdasilvalatestlatest.mp4" type="video/mp4" />
+      </video>
 
       {showContent && (
         <div
@@ -240,7 +353,7 @@ export default function Home() {
             {/* Stickers above marc dasilva text */}
             {stickerPositions.length > 0 && (
               <div
-                className="absolute top-0 left-0 fade-in"
+                className="sticker-layer-fade absolute top-0 left-0"
                 style={{
                   width: DESIGN_WIDTH,
                   height: DESIGN_HEIGHT,
@@ -249,10 +362,10 @@ export default function Home() {
                 }}
               >
                 {STICKERS.map((sticker: StickerConfig, i: number) => {
-                  if (fallenStickerIndices.includes(i)) return null;
+                  if (fallenStickerSet.has(i)) return null;
                   const pos = stickerPositions[i];
                   if (!pos) return null;
-                  const isFalling = animatingOffIndices.includes(i);
+                  const isFalling = animatingStickerSet.has(i);
                   return (
                     <motion.div
                       key={sticker.id}
@@ -264,21 +377,18 @@ export default function Home() {
                         height: "100%",
                         pointerEvents: "none",
                         zIndex: isFalling ? 100 : undefined,
+                        willChange: isFalling ? "transform, opacity" : "auto",
                       }}
-                      initial={{ y: 0, rotate: 0, opacity: 1 }}
-                      animate={
+                      initial={false}
+                      animate={isFalling ? { y: "150vh", opacity: 0 } : undefined}
+                      transition={
                         isFalling
                           ? {
-                              y: "150vh",
-                              rotate: 0,
-                              opacity: 0,
+                              duration: resetInstant ? 0 : 1.7,
+                              ease: [0.25, 0.46, 0.45, 0.94],
                             }
-                          : { y: 0, rotate: 0, opacity: 1 }
+                          : undefined
                       }
-                      transition={{
-                        duration: resetInstant ? 0 : 1.7,
-                        ease: [0.25, 0.46, 0.45, 0.94],
-                      }}
                       onPointerDownCapture={(e) => {
                         if (e.shiftKey) return;
                         if (sticker.href)
@@ -335,9 +445,16 @@ export default function Home() {
                         imageSrc={sticker.src}
                         rotate={sticker.rotate}
                         width={sticker.width ?? STICKER_SIZE}
-                        initialPosition={pos as any}
+                        initialPosition={pos}
                         peelDirection={0}
                         clampOnResize={false}
+                        allowInteraction={stickersInteractive}
+                        activateAfterMs={
+                          lowEndMode
+                            ? 240 + i * STICKER_INTERACTION_STAGGER_LOW_END_MS
+                            : i * STICKER_INTERACTION_STAGGER_MS
+                        }
+                        disablePeel={sticker.disablePeel}
                         onDragEnd={(x: number, y: number) => {
                           const rounded = {
                             x: Math.round(x),
@@ -369,7 +486,7 @@ export default function Home() {
               style={{ paddingBottom: "15vh" }}
             >
               <div
-                className="text-black fade-in relative pointer-events-auto"
+                className="text-black fade-in-opacity relative pointer-events-auto"
                 style={{
                   width: "clamp(320px, 90vw, 680px)",
                   maxHeight: "clamp(440px, 88vh, 880px)",
@@ -567,7 +684,7 @@ export default function Home() {
                     className="flex items-center gap-2 font-bold italic"
                     style={{ marginBottom: "0.6em", fontSize: "1.2em" }}
                   >
-                    What I've Been Building
+                    What I&apos;ve Been Building
                     <Image
                       src="/9923735.png"
                       alt=""

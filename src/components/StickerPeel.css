@@ -16,6 +16,7 @@
   position: relative;
   transform: rotate(var(--peel-direction));
   transform-origin: center;
+  contain: layout paint;
 }
 
 .sticker-container * {
@@ -41,7 +42,6 @@
 }
 
 .sticker-lighting {
-  /* Lighting filter disabled to avoid tint on load */
   filter: none;
 }
 
@@ -81,7 +81,9 @@
     var(--sticker-start) var(--sticker-start)
   );
   transform: scaleY(-1);
-  transition: all 0.6s ease-out;
+  transition:
+    clip-path 0.6s ease-out,
+    top 0.6s ease-out;
 }
 
 .flap > * {
@@ -110,13 +112,13 @@
 }
 
 .flap-lighting {
-  /* Lighting filter disabled to avoid tint */
   filter: none;
 }
 
 .flap-image {
   transform: rotate(var(--sticker-rotate));
-  filter: url(#expandAndFill);
+  opacity: 0.88;
+  filter: grayscale(1) brightness(0.86);
 }
 
 .draggable {
@@ -125,6 +127,9 @@
   pointer-events: auto;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+  contain: layout paint style;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .draggable:active {
@@ -145,6 +150,16 @@
 .sticker-image,
 .flap-image {
   width: var(--sticker-width, 200px);
+}
+
+.sticker-static {
+  transform: rotate(var(--peel-direction));
+  transform-origin: center;
+  contain: layout paint;
+}
+
+.sticker-static .sticker-image {
+  display: block;
 }
 
 .sticker-main,
