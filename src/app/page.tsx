@@ -57,7 +57,7 @@ export const STICKERS: StickerConfig[] = [
     src: "/stickers/devpost.png",
     rotate: 6,
     width: 200,
-    href: "https://devpost.com/marcdasilva234",
+    href: "https://devpost.com/marcdasilva",
   },
   {
     id: "linkedin",
@@ -846,7 +846,7 @@ export default function Home() {
                         whileHover="hover"
                         initial="initial"
                       >
-                        Kijiji for Food Donations
+                        FB For Food Donations
                         <span
                           className="absolute bottom-0 left-0 bg-gray-400 block"
                           style={{ width: "100%", height: "1px" }}
